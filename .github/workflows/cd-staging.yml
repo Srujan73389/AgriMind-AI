@@ -1,48 +1,29 @@
-name: CD Staging
+name: Build & Verify
 
 on:
-  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
-  # Uncomment push trigger when AWS secrets (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are configured in GitHub Secrets
-  # push:
-  #   branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy-staging:
+  build-web:
     runs-on: ubuntu-latest
-    if: "${{ secrets.AWS_ACCESS_KEY_ID != '' }}"
-    environment: staging
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: actions/setup-node@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'apps/web/package-lock.json'
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push API image
+      - name: Install dependencies
         run: |
-          docker build -f services/api/Dockerfile -t ${{ steps.login-ecr.outputs.registry }}/agrimind-api:${{ github.sha }} .
-          docker push ${{ steps.login-ecr.outputs.registry }}/agrimind-api:${{ github.sha }}
+          cd apps/web
+          npm ci
 
-      - name: Deploy to ECS Staging
+      - name: Verify TypeScript & Build
         run: |
-          aws ecs update-service \
-            --cluster agrimind-staging \
-            --service api \
-            --force-new-deployment
-
-      - name: Wait for deployment
-        run: |
-          aws ecs wait services-stable \
-            --cluster agrimind-staging \
-            --services api
-
-      - name: Run smoke tests
-        run: |
-          curl -f https://staging.api.agrimind.ai/health || exit 1
+          cd apps/web
+          npm run build
