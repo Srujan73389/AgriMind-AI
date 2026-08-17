@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "agrimind-ai"
+version = "0.1.0"
+description = "AI-powered smart farming SaaS platform"
+authors = ["AgriMind Team <team@agrimind.ai>"]
+readme = "README.md"
+packages = [
+    { include = "services" },
+    { include = "packages" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+fastapi = ">=0.111.0"
+uvicorn = {extras = ["standard"], version = ">=0.30.1"}
+sqlalchemy = ">=2.0.30"
+asyncpg = ">=0.29.0"
+alembic = ">=1.13.1"
+pydantic = ">=2.7.4"
+pydantic-settings = ">=2.3.4"
+geoalchemy2 = ">=0.15.1"
+redis = ">=5.0.6"
+qdrant-client = ">=1.9.1"
+celery = ">=5.4.0"
+paho-mqtt = ">=2.1.0"
+bcrypt = ">=4.0.0"
+python-jose = {extras = ["cryptography"], version = ">=3.3.0"}
+langchain = ">=0.2.6"
+langgraph = ">=0.1.3"
+openai = ">=1.35.7"
+python-multipart = ">=0.0.9"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-asyncio = "^0.23.7"
+black = "^24.4.2"
+isort = "^5.13.2"
+flake8 = "^7.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

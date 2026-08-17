@@ -1,0 +1,62 @@
+[
+  {
+    "question": "What are the signs of nitrogen deficiency in corn?",
+    "expected_topics": ["yellowing", "leaves", "stunted growth", "v-shape"],
+    "should_call_tools": false,
+    "expected_confidence_above": 0.8
+  },
+  {
+    "question": "How much water does my wheat crop need right now? My farm id is 5.",
+    "expected_topics": ["irrigation", "soil moisture", "evapotranspiration"],
+    "should_call_tools": true,
+    "expected_confidence_above": 0.85
+  },
+  {
+    "question": "What's the best time to apply pesticide for aphids?",
+    "expected_topics": ["early morning", "late evening", "wind", "temperature"],
+    "should_call_tools": false,
+    "expected_confidence_above": 0.75
+  },
+  {
+    "question": "Give me a yield prediction for my rice farm.",
+    "expected_topics": ["yield", "prediction", "tonnes"],
+    "should_call_tools": true,
+    "expected_confidence_above": 0.9
+  },
+  {
+    "question": "Is it going to rain tomorrow?",
+    "expected_topics": ["weather", "rain", "forecast"],
+    "should_call_tools": true,
+    "expected_confidence_above": 0.9
+  },
+  {
+    "question": "What crops are good for sandy soil?",
+    "expected_topics": ["carrots", "potatoes", "root vegetables", "drainage"],
+    "should_call_tools": false,
+    "expected_confidence_above": 0.8
+  },
+  {
+    "question": "How do I calibrate my soil moisture sensor?",
+    "expected_topics": ["dry", "saturated", "wet", "water", "points"],
+    "should_call_tools": false,
+    "expected_confidence_above": 0.85
+  },
+  {
+    "question": "Check the NDVI for my farm.",
+    "expected_topics": ["ndvi", "vegetation", "health", "index"],
+    "should_call_tools": true,
+    "expected_confidence_above": 0.9
+  },
+  {
+    "question": "How do I control powdery mildew on pumpkins?",
+    "expected_topics": ["fungicide", "spacing", "air circulation", "neem oil"],
+    "should_call_tools": false,
+    "expected_confidence_above": 0.8
+  },
+  {
+    "question": "What is the current market price for organic wheat?",
+    "expected_topics": ["price", "market", "organic", "wheat"],
+    "should_call_tools": true,
+    "expected_confidence_above": 0.85
+  }
+]

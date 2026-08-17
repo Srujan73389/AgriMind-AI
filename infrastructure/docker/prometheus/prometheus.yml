@@ -1,0 +1,41 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['api:8000']
+
+  - job_name: 'ai'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['ai:8001']
+
+  - job_name: 'vision'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['vision:8002']
+
+  - job_name: 'iot'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['iot:8003']
+
+  - job_name: 'satellite'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['satellite:8004']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']

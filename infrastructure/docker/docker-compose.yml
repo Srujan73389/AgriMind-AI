@@ -1,0 +1,195 @@
+version: '3.8'
+
+x-backend-env: &backend-env
+  DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://agrimind:changeme@postgres:5432/agrimind}
+  REDIS_URL: ${REDIS_URL:-redis://:changeme@redis:6379/0}
+  JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-this-to-a-64-char-random-string}
+  QDRANT_HOST: ${QDRANT_HOST:-qdrant}
+  QDRANT_PORT: ${QDRANT_PORT:-6333}
+  MQTT_HOST: ${MQTT_HOST:-mosquitto}
+  MQTT_PORT: ${MQTT_PORT:-1883}
+
+services:
+  postgres:
+    image: timescale/timescaledb-ha:pg16-latest
+    environment:
+      POSTGRES_DB: agrimind
+      POSTGRES_USER: agrimind
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agrimind -d agrimind"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agrimind_net
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD:-changeme}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - agrimind_net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - agrimind_net
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - agrimind_net
+
+  api:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    environment:
+      <<: *backend-env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - agrimind_net
+
+  ai:
+    build:
+      context: ../..
+      dockerfile: services/ai/Dockerfile
+    environment:
+      <<: *backend-env
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    ports:
+      - "8001:8001"
+    depends_on:
+      - qdrant
+    networks:
+      - agrimind_net
+
+  vision:
+    build:
+      context: ../..
+      dockerfile: services/vision/Dockerfile
+    environment:
+      <<: *backend-env
+    ports:
+      - "8002:8002"
+    networks:
+      - agrimind_net
+
+  iot:
+    build:
+      context: ../..
+      dockerfile: services/iot/Dockerfile
+    environment:
+      <<: *backend-env
+    ports:
+      - "8003:8003"
+    depends_on:
+      - mosquitto
+    networks:
+      - agrimind_net
+
+  satellite:
+    build:
+      context: ../..
+      dockerfile: services/satellite/Dockerfile
+    environment:
+      <<: *backend-env
+    ports:
+      - "8004:8004"
+    networks:
+      - agrimind_net
+
+  web:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - agrimind_net
+
+  celery-worker:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    command: celery -A agrimind.worker worker --loglevel=info
+    environment:
+      <<: *backend-env
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - agrimind_net
+
+  celery-beat:
+    build:
+      context: ../..
+      dockerfile: services/api/Dockerfile
+    command: celery -A agrimind.worker beat --loglevel=info
+    environment:
+      <<: *backend-env
+    depends_on:
+      - redis
+    networks:
+      - agrimind_net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - agrimind_net
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - agrimind_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  agrimind_net:
+    driver: bridge
