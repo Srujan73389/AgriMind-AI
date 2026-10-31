@@ -38,7 +38,7 @@ isort = "^5.13.2"
 flake8 = "^7.1.0"
 
 [tool.vercel]
-entrypoint = "services.api.main:app"
+entrypoint = "main:app"
 
 [build-system]
 requires = ["poetry-core"]

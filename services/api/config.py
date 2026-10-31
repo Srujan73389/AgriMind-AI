@@ -1,7 +1,9 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore", env_file=".env", env_file_encoding="utf-8")
+
     database_url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/agrimind")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     secret_key: str = os.getenv("JWT_SECRET_KEY", "supersecretkey")
@@ -12,8 +14,5 @@ class Settings(BaseSettings):
     vision_service_url: str = os.getenv("VISION_SERVICE_URL", "http://localhost:8002")
     iot_service_url: str = os.getenv("IOT_SERVICE_URL", "http://localhost:8003")
     satellite_service_url: str = os.getenv("SATELLITE_SERVICE_URL", "http://localhost:8004")
-
-    class Config:
-        env_file = ".env.example"
 
 settings = Settings()

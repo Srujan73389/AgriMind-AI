@@ -1,18 +1,11 @@
-import xgboost as xgb
-import pandas as pd
-import numpy as np
 from typing import Dict, Any
 
 class YieldPredictor:
     def __init__(self):
-        # In a real scenario, we'd load a pre-trained model here
-        # self.model = xgb.Booster()
-        # self.model.load_model('yield_model.json')
         pass
         
     def predict(self, features: Dict[str, Any]) -> Dict[str, float]:
         """Predict crop yield with confidence intervals."""
-        # Mock prediction logic
         base_yield = 5.0 # tons per hectare
         
         # Adjust based on features
