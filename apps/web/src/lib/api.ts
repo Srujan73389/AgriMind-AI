@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+const getBaseURL = () => {
+  if (typeof window === 'undefined' && process.env.API_URL) {
+    const internalUrl = process.env.API_URL.replace(/\/$/, '');
+    return internalUrl.endsWith('/api') ? internalUrl : `${internalUrl}/api`;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || '/api';
+};
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
