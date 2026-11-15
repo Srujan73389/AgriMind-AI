@@ -1,5 +1,5 @@
 # AgriMind AI
-
+Live Link:https://agrimind-ai-yoge.vercel.app/
 An AI-powered smart farming SaaS platform.
 
 ## Architecture
